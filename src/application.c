@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 /* Application specific data structures */
 typedef struct person_{
@@ -17,7 +18,39 @@ typedef struct employee_ {
     double salary;
 } employee_t;
 
-int search_person_by_name(void *data, void *key) {
+static int compare_persons(void *person1, void *person2) {
+    person_t *person_a = (person_t *) person1;
+    person_t *person_b = (person_t *) person2;
+
+    if(strncmp(person_a->name, person_b->name, 32) < 0) {
+        return -1;
+    } else if(strncmp(person_a->name, person_b->name, 32) > 0) {
+        return 1;
+    } else if(person_a->age < person_b->age) {
+        return -1;
+    } else if(person_a->age > person_b->age) {
+        return 1;
+    } else if(person_a->weight < person_b->weight) {
+        return -1;
+    } else if(person_a->weight > person_b->weight) {
+        return 1;
+    }
+    assert(0);
+}
+
+static int compare_employees(void *employee1, void *employee2) {
+    employee_t *employee_a = (employee_t *) employee1;
+    employee_t *employee_b = (employee_t *) employee2;
+
+    if(employee_a->employee_id < employee_b->employee_id) {
+        return -1;
+    } else if(employee_a->employee_id > employee_b->employee_id) {
+        return 1;
+    }
+    assert(0);
+}
+
+static int search_person_by_name(void *data, void *key) {
     if(!data) return -1;
     person_t *person = (person_t*) data;
     char *name = (char *) key;
@@ -25,7 +58,7 @@ int search_person_by_name(void *data, void *key) {
     return -1;
 }
 
-int search_employee_by_id(void *data, void *key) {
+static int search_employee_by_id(void *data, void *key) {
     if(!data) return -1;
     employee_t *employee = (employee_t*)data;
     int employee_id = *(int*)key;
@@ -85,7 +118,8 @@ int main(int argc, char **argv) {
     person3->weight = 59;
 
     /*Create a new linked list*/
-
+    /* linked list which allows duplicate */
+    printf("\nlinked list which allows duplicate and stored data unsorted as per insertion order\n");
     dll_t *person_db = get_new_dll();
     add_data_to_dll(person_db, person1);
     add_data_to_dll(person_db, person2);
@@ -100,8 +134,17 @@ int main(int argc, char **argv) {
         printf("Searched Person: \n");
         print_person_details(searched_person);
     }
-
     /* Employees */
+
+    /* sorted dll*/
+    printf("\nlinked list which stores unique data in sorted order\n");
+    dll_t *person_sorted = get_new_dll();
+    registerCompareDataCallback(person_sorted, compare_persons);
+
+    dll_priority_insertion(person_sorted, person1);
+    dll_priority_insertion(person_sorted, person2);
+    dll_priority_insertion(person_sorted, person3);
+    print_person_db(person_sorted);
 
     employee_t *employee1 = calloc(1, sizeof(employee_t));
     strncpy(employee1->name, "Nitin", strlen("Nitin"));
@@ -121,6 +164,8 @@ int main(int argc, char **argv) {
     employee3->salary = 100;
     strncpy(employee3->designation, "C/C++ developer", strlen("C/C++ developer"));
 
+    /* Employee unsorted data */
+    printf("\nEmployee unsorted data\n");
     dll_t *employee_db = get_new_dll();
     add_data_to_dll(employee_db, employee1);
     add_data_to_dll(employee_db, employee2);
