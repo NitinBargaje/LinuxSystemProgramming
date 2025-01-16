@@ -80,12 +80,22 @@ static void print_employee_details(employee_t *employee) {
 }
 
 static void print_employee_db(dll_t *employee_db) {
+    #if 0
+    /* Old code */
     if(!employee_db || !employee_db->head) return;
     dll_node_t *head = employee_db->head;
     while(head) {
         print_employee_details(head->data);
         head = head->right;
     }
+    #endif
+
+    dll_node_t *node_ptr = NULL;
+    employee_t *data = NULL;
+    ITERATE_LIST_BEGIN(employee_db, node_ptr) {
+        data = node_ptr->data;
+        print_employee_details(data);
+    } ITERATE_LIST_END;
 }
 
 static void print_person_db(dll_t* person_db) {
